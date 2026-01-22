@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Ticket } from '../../types';
+import { apiService } from '../../lib/api';
 import TicketCard from './TicketCard';
+import toast from 'react-hot-toast';
 
 export default function TicketList() {
     const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -10,50 +12,72 @@ export default function TicketList() {
     useEffect(() => {
         fetchTickets();
 
-        // Subscribe to realtime changes
-        const channel = supabase
-            .channel('schema-db-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*', // Listen to INSERT, UPDATE, DELETE
-                    schema: 'public',
-                    table: 'tickets',
-                },
-                (payload) => {
-                    console.log('Realtime update:', payload);
-                    if (payload.eventType === 'INSERT') {
-                        setTickets((prev) => [payload.new as Ticket, ...prev]);
-                    } else if (payload.eventType === 'UPDATE') {
-                        setTickets((prev) =>
-                            prev.map((t) => (t.id === payload.new.id ? (payload.new as Ticket) : t))
-                        );
-                    } else if (payload.eventType === 'DELETE') {
-                        setTickets((prev) => prev.filter((t) => t.id !== payload.old.id));
+        // Subscribe to realtime changes (solo si Supabase está disponible)
+        let channel: any = null;
+        
+        try {
+            channel = supabase
+                .channel('schema-db-changes')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*', // Listen to INSERT, UPDATE, DELETE
+                        schema: 'public',
+                        table: 'tickets',
+                    },
+                    (payload) => {
+                        console.log('📡 Realtime update:', payload);
+                        if (payload.eventType === 'INSERT') {
+                            setTickets((prev) => [payload.new as Ticket, ...prev]);
+                            toast.success('Nuevo ticket recibido');
+                        } else if (payload.eventType === 'UPDATE') {
+                            setTickets((prev) =>
+                                prev.map((t) => (t.id === payload.new.id ? (payload.new as Ticket) : t))
+                            );
+                            toast.success('Ticket actualizado');
+                        } else if (payload.eventType === 'DELETE') {
+                            setTickets((prev) => prev.filter((t) => t.id !== payload.old.id));
+                        }
                     }
-                }
-            )
-            .subscribe();
+                )
+                .subscribe();
+        } catch (error) {
+            console.log('⚠️ Realtime no disponible, usando modo polling');
+            // Fallback: polling cada 5 segundos
+            const interval = setInterval(fetchTickets, 5000);
+            return () => clearInterval(interval);
+        }
 
         return () => {
-            supabase.removeChannel(channel);
+            if (channel) {
+                supabase.removeChannel(channel);
+            }
         };
     }, []);
 
     const fetchTickets = async () => {
         try {
+            // Intentar obtener desde Supabase primero
             const { data, error } = await supabase
                 .from('tickets')
                 .select('*')
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error fetching tickets:', error);
-            } else {
-                setTickets(data || []);
+                console.log('⚠️ Supabase no disponible, obteniendo desde backend');
+                throw error;
             }
+            
+            setTickets(data || []);
         } catch (err) {
-            console.error('Unexpected error:', err);
+            // Fallback: obtener desde el backend Python
+            try {
+                const backendTickets = await apiService.getTickets();
+                setTickets(backendTickets);
+            } catch (backendError) {
+                console.error('❌ Error obteniendo tickets:', backendError);
+                toast.error('No se pudieron cargar los tickets');
+            }
         } finally {
             setLoading(false);
         }

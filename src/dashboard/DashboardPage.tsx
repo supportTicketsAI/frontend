@@ -1,5 +1,7 @@
 import { useAuth } from '../auth/AuthContext';
 import TicketList from './components/TicketList';
+import TestTicketCreator from './components/TestTicketCreator';
+import ConnectionStatus from './components/ConnectionStatus';
 
 export default function DashboardPage() {
     const { user, signOut } = useAuth();
@@ -22,10 +24,7 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700">
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                                <span className="text-xs font-medium text-slate-300">System Online</span>
-                            </div>
+                            <ConnectionStatus />
 
                             <div className="h-6 w-px bg-slate-800"></div>
 
@@ -50,12 +49,19 @@ export default function DashboardPage() {
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                        Live Incoming Tickets
+                        AI Support Co-Pilot Dashboard
                     </h1>
-                    <p className="text-slate-400 mt-1">Real-time analysis and categorization stream.</p>
+                    <p className="text-slate-400 mt-1">Análisis inteligente de tickets en tiempo real con IA.</p>
                 </div>
 
-                <TicketList />
+                {/* Test Panel */}
+                <TestTicketCreator />
+
+                {/* Tickets List */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-slate-200 mb-4">Tickets Procesados</h2>
+                    <TicketList />
+                </div>
             </main>
         </div>
     );

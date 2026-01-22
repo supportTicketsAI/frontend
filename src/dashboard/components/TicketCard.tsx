@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Ticket } from '../../types';
+import { apiService } from '../../lib/api';
+import toast from 'react-hot-toast';
 
 interface TicketCardProps {
     ticket: Ticket;
@@ -10,22 +12,18 @@ export default function TicketCard({ ticket }: TicketCardProps) {
 
     const handleProcess = async () => {
         setProcessing(true);
+        
         try {
-            // TODO: Replace with actual API call to Python Microservice
-            const response = await fetch('http://localhost:8000/process-ticket', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ticket_id: ticket.id, text: ticket.description }),
+            const result = await apiService.processTicket({
+                ticket_id: ticket.id,
+                description: ticket.description
             });
 
-            if (!response.ok) throw new Error('Processing failed');
-
-            // We don't need to manually update state here because the 
-            // Supersbase Realtime subscription in the parent list will
-            // catch the 'processed: true' update and re-render this card.
-        } catch (error) {
+            toast.success(`Ticket procesado: ${result.category} (${result.sentiment})`);
+            
+        } catch (error: any) {
             console.error('Error processing ticket:', error);
-            alert('Failed to process ticket. Ensure the AI Service is running.');
+            toast.error(error.message || 'Error al procesar ticket. Verifica que el backend esté corriendo.');
         } finally {
             setProcessing(false);
         }
@@ -33,8 +31,8 @@ export default function TicketCard({ ticket }: TicketCardProps) {
 
     const getSentimentColor = (sentiment: string | null) => {
         switch (sentiment?.toLowerCase()) {
-            case 'positive': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-            case 'negative': return 'bg-red-500/10 text-red-400 border-red-500/20';
+            case 'positivo': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+            case 'negativo': return 'bg-red-500/10 text-red-400 border-red-500/20';
             case 'neutral': return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
             default: return 'bg-slate-700/50 text-slate-400 border-slate-700';
         }
@@ -42,21 +40,16 @@ export default function TicketCard({ ticket }: TicketCardProps) {
 
     const getCategoryIcon = (category: string | null) => {
         switch (category?.toLowerCase()) {
-            case 'technical': return '🔧';
-            case 'billing': return '💳';
-            case 'sales': return '💼';
+            case 'técnico': return '🔧';
+            case 'facturación': return '💳';
+            case 'comercial': return '💼';
+            case 'soporte': return '📚';
             default: return '📝';
         }
     };
 
     return (
-        <div className={`
-      relative overflow-hidden rounded-xl border p-5 transition-all duration-300
-      ${ticket.processed
-                ? 'bg-slate-800/50 border-slate-700/50'
-                : 'bg-slate-800 border-slate-700 shadow-lg hover:shadow-blue-500/5 hover:border-blue-500/30'
-            }
-    `}>
+        <div className={`relative overflow-hidden rounded-xl border p-5 transition-all duration-300 ${ticket.processed ? 'bg-slate-800/50 border-slate-700/50' : 'bg-slate-800 border-slate-700 shadow-lg hover:shadow-blue-500/5 hover:border-blue-500/30'}`}>
             <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-2">
                     <span className="text-xs font-mono text-slate-500">{ticket.id.slice(0, 8)}</span>
@@ -68,9 +61,14 @@ export default function TicketCard({ ticket }: TicketCardProps) {
                 </div>
 
                 {ticket.processed ? (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <span className={`text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${getSentimentColor(ticket.sentiment)}`}>
                             <span>{ticket.sentiment}</span>
+                            {ticket.confidence_score && (
+                                <span className="opacity-70">
+                                    {(ticket.confidence_score * 100).toFixed(0)}%
+                                </span>
+                            )}
                         </span>
                         <span className="text-xs px-2.5 py-1 rounded-full bg-slate-700 border border-slate-600 text-slate-300 flex items-center gap-1.5">
                             <span>{getCategoryIcon(ticket.category)} {ticket.category}</span>
@@ -88,7 +86,15 @@ export default function TicketCard({ ticket }: TicketCardProps) {
                 {ticket.description}
             </p>
 
-            <div className="flex items-center justify-end">
+            <div className="flex items-center justify-between">
+                {ticket.processing_time && (
+                    <span className="text-xs text-slate-500">
+                        Procesado en {ticket.processing_time}s
+                    </span>
+                )}
+                
+                <div className="flex-1"></div>
+
                 {!ticket.processed ? (
                     <button
                         onClick={handleProcess}
@@ -101,11 +107,11 @@ export default function TicketCard({ ticket }: TicketCardProps) {
                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                 </svg>
-                                AI Analysis...
+                                AI Analizando...
                             </>
                         ) : (
                             <>
-                                <span>✨ Process with AI</span>
+                                <span>✨ Procesar con IA</span>
                             </>
                         )}
                     </button>
@@ -114,7 +120,7 @@ export default function TicketCard({ ticket }: TicketCardProps) {
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Processed
+                        Procesado
                     </div>
                 )}
             </div>
