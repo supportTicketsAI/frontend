@@ -12,7 +12,8 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center">
           <div className="h-12 w-12 bg-blue-500/20 rounded-full mb-4"></div>
-          <div className="h-4 w-32 bg-slate-700 rounded"></div>
+          <div className="h-4 w-32 bg-slate-700 rounded mb-2"></div>
+          <div className="text-slate-400 text-sm">Verificando autenticación...</div>
         </div>
       </div>
     );

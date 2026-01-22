@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from './AuthContext';
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('e05072003@gmail.com'); // Pre-filled para demo
+    const [password, setPassword] = useState('123456aA+'); // Pre-filled para demo
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+    const navigate = useNavigate();
+    const { session, loading: authLoading } = useAuth();
+
+    // Redireccionar si ya está autenticado
+    useEffect(() => {
+        if (session && !authLoading) {
+            navigate('/dashboard', { replace: true });
+        }
+    }, [session, authLoading, navigate]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -21,7 +32,8 @@ export default function LoginPage() {
             setMessage({ type: 'error', text: error.message });
             setLoading(false);
         } else {
-            // Auth state change will handle redirect via App.tsx or Context
+            setMessage({ type: 'success', text: '¡Login exitoso!' });
+            // La redirección se maneja automáticamente por el useEffect
         }
     };
 
@@ -83,10 +95,16 @@ export default function LoginPage() {
                                 Authenticating...
                             </span>
                         ) : (
-                            'Initialize Session'
+                            '🚀 Acceder al Dashboard IA'
                         )}
                     </button>
                 </form>
+
+                <div className="mt-6 p-4 bg-slate-900/50 rounded-lg">
+                    <p className="text-xs text-slate-400 text-center">
+                        💡 <strong>Para VIVETORI:</strong> Credenciales pre-configuradas para demostración
+                    </p>
+                </div>
             </div>
         </div>
     );

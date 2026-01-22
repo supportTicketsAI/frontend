@@ -23,37 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 
                 if (error) {
                     console.error('❌ Error getting session:', error);
-                    // Para demo, crear una sesión simulada
-                    const mockUser = {
-                        id: 'demo-user',
-                        email: 'demo@vivetori.com',
-                        user_metadata: { name: 'Demo User' },
-                        app_metadata: {},
-                        aud: 'authenticated',
-                        created_at: new Date().toISOString()
-                    } as unknown as User;
-                    
-                    setUser(mockUser);
-                    setSession({ user: mockUser } as Session);
-                } else {
-                    setSession(session);
-                    setUser(session?.user ?? null);
                 }
+                
+                setSession(session);
+                setUser(session?.user ?? null);
             } catch (error) {
                 console.error('🔌 Supabase connection error:', error);
-                // Modo demo sin Supabase
-                const mockUser = {
-                    id: 'demo-user',
-                    email: 'demo@vivetori.com',
-                    user_metadata: { name: 'Demo User' },
-                    app_metadata: {},
-                    aud: 'authenticated',
-                    created_at: new Date().toISOString()
-                } as unknown as User;
-                
-                console.log('🎭 Usando modo demo para la presentación');
-                setUser(mockUser);
-                setSession({ user: mockUser } as Session);
+                setSession(null);
+                setUser(null);
             } finally {
                 setLoading(false);
             }
