@@ -68,6 +68,7 @@ class ApiService {
         const randomDescription = testDescriptions[Math.floor(Math.random() * testDescriptions.length)];
         
         return this.processTicket({
+            ticket_id: crypto.randomUUID(),
             description: randomDescription
         });
     }

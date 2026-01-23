@@ -1,7 +1,7 @@
 import { useAuth } from '../auth/AuthContext';
 import TicketList from './components/TicketList';
-import TestTicketCreator from './components/TestTicketCreator';
-import ConnectionStatus from './components/ConnectionStatus';
+import TicketCreator from './components/TestTicketCreator';
+import TicketStats from './components/TicketStats';
 
 export default function DashboardPage() {
     const { user, signOut } = useAuth();
@@ -24,10 +24,6 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <ConnectionStatus />
-
-                            <div className="h-6 w-px bg-slate-800"></div>
-
                             <div className="flex items-center gap-3">
                                 <span className="text-sm text-slate-400 hidden sm:block">{user?.email}</span>
                                 <button
@@ -54,8 +50,11 @@ export default function DashboardPage() {
                     <p className="text-slate-400 mt-1">Análisis inteligente de tickets en tiempo real con IA.</p>
                 </div>
 
-                {/* Test Panel */}
-                <TestTicketCreator />
+                {/* Ticket Creator Form */}
+                <TicketCreator />
+
+                {/* Statistics Dashboard */}
+                <TicketStats />
 
                 {/* Tickets List */}
                 <div className="mb-6">

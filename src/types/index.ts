@@ -15,7 +15,7 @@ export interface Ticket {
 
 // Request/Response types para la API
 export interface ProcessTicketRequest {
-    ticket_id?: string;
+    ticket_id: string;  // Requerido: UUID del ticket
     description: string;
 }
 
