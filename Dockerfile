@@ -12,9 +12,21 @@ RUN bun install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build arguments for environment variables
-ARG VITE_DEFAULT_SERVICE_URL
-ENV VITE_DEFAULT_SERVICE_URL=$VITE_DEFAULT_SERVICE_URL
+# Build arguments for ALL required environment variables
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY  
+ARG VITE_API_BASE_URL
+
+# Set environment variables for build
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+# Debug: Show what variables we received
+RUN echo "🔍 Build-time Environment Variables:"
+RUN echo "VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:0:30}..."
+RUN echo "VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:+DEFINED}"
+RUN echo "VITE_API_BASE_URL: ${VITE_API_BASE_URL}"
 
 # Build the application
 RUN bun run build
