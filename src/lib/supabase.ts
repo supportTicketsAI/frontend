@@ -3,19 +3,27 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug logging con valores ocultos para seguridad
 console.log('🔍 Supabase Config:', { 
-    url: supabaseUrl ? '✅ Configurada' : '❌ Falta',
-    key: supabaseAnonKey ? '✅ Configurada' : '❌ Falta'
+    url: supabaseUrl ? `✅ ${supabaseUrl.substring(0, 20)}...` : '❌ Falta',
+    key: supabaseAnonKey ? `✅ ${supabaseAnonKey.substring(0, 20)}...` : '❌ Falta'
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Missing Supabase environment variables! Please check your .env file.');
-  console.error('Expected variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY');
+  const errorMsg = [
+    '❌ Missing Supabase environment variables! Please check your .env file.',
+    'Expected variables: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY',
+    `Current values: URL=${supabaseUrl || 'undefined'}, KEY=${supabaseAnonKey ? 'defined' : 'undefined'}`,
+    '🔧 For deployment, ensure variables are set in your hosting platform.'
+  ];
+  
+  errorMsg.forEach(msg => console.error(msg));
+  throw new Error('Missing Supabase configuration. Check environment variables.');
 }
 
 export const supabase = createClient(
-    supabaseUrl || '', 
-    supabaseAnonKey || '',
+    supabaseUrl, 
+    supabaseAnonKey,
     {
         auth: {
             autoRefreshToken: true,
