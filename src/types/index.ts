@@ -1,4 +1,5 @@
-// Tipos que coinciden exactamente con el backend Python
+import { apiBaseUrl } from '../lib/env.config';
+
 export type TicketCategory = 'Técnico' | 'Facturación' | 'Comercial' | 'Soporte';
 export type TicketSentiment = 'Positivo' | 'Neutral' | 'Negativo';
 
@@ -13,7 +14,6 @@ export interface Ticket {
     processing_time?: number;
 }
 
-// Request/Response types para la API
 export interface ProcessTicketRequest {
     ticket_id: string;  // Requerido: UUID del ticket
     description: string;
@@ -29,9 +29,8 @@ export interface ProcessTicketResponse {
     notification_sent: boolean;
 }
 
-// API Configuration
 export const API_CONFIG = {
-    BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
+    BASE_URL: apiBaseUrl,
     ENDPOINTS: {
         PROCESS_TICKET: '/process-ticket',
         GET_TICKETS: '/tickets',
