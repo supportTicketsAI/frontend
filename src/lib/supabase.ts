@@ -9,6 +9,13 @@ console.log('🔍 Supabase Config:', {
     key: supabaseAnonKey ? `✅ ${supabaseAnonKey.substring(0, 20)}...` : '❌ Falta'
 });
 
+// Debug adicional para ver valores exactos
+console.log('🔍 Environment Debug:', {
+    'import.meta.env.VITE_SUPABASE_URL': import.meta.env.VITE_SUPABASE_URL,
+    'import.meta.env.VITE_SUPABASE_ANON_KEY': import.meta.env.VITE_SUPABASE_ANON_KEY ? 'defined' : 'undefined',
+    'All env keys': Object.keys(import.meta.env).filter(key => key.startsWith('VITE_'))
+});
+
 if (!supabaseUrl || !supabaseAnonKey) {
   const errorMsg = [
     '❌ Missing Supabase environment variables! Please check your .env file.',
