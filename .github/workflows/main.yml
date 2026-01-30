@@ -14,11 +14,3 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-        
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
-
-      - name: Deploy to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service frontend --path supportTicketsAI/frontend
