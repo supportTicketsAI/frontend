@@ -21,4 +21,4 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service supportTicketsAI/frontend
+        run: railway up --service frontend --path supportTicketsAI/frontend
